@@ -9,6 +9,7 @@ const layers = [];
 let tool = 'pen';
 let currentLayerIndex = 0;
 let drawing = false;
+let lastX, lastY;
 
 const penColorInput = document.getElementById('penColor');
 const layerEffectsSelect = document.getElementById('layerEffects');
@@ -80,21 +81,21 @@ function getPos(e, canvas) {
 
 function startDraw(e) {
     drawing = true;
-    const ctx = layers[currentLayerIndex].ctx;
-    const { x, y } = getPos(e, displayCanvas);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+    const pos = getPos(e, displayCanvas);
+    lastX = pos.x;
+    lastY = pos.y;
 }
 
 function draw(e) {
     if (!drawing) return;
+
     const ctx = layers[currentLayerIndex].ctx;
     const { x, y } = getPos(e, displayCanvas);
     const pressure = e.pressure || 0.5;
 
-    ctx.lineWidth = pressure * 50;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
+    ctx.lineWidth = pressure * 50;
 
     if (tool === 'pen') {
         ctx.globalCompositeOperation = 'source-over';
@@ -104,14 +105,21 @@ function draw(e) {
         ctx.strokeStyle = 'rgba(0,0,0,1)'; // 実際の色は関係ない
     }
     
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
+
+    lastX = x;
+    lastY = y;
 
     renderAllLayers();
 }
 
 function endDraw() {
     drawing = false;
+    lastX = undefined;
+    lastY = undefined;
     renderAllLayers();
 }
 
