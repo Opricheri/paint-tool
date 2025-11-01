@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レイヤー対応お絵かきアプリ</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="canvas-container">
+        <canvas id="bg" width="600" height="400"></canvas>
+    </div>
+
+    <div style="position: fixed; bottom: 40px; left: 20px;">
+        <button onclick="addLayer()">＋レイヤー追加</button>
+    </div>
+
+    <div id="layerContainer" style="position: fixed; bottom: 10px; left: 20px;">
+    </div>
+
+    <div id="layerEffectSelector" style="position: fixed; bottom: 40px; left: 150px;">
+        <select id="layerEffects">
+            <option value="source-over" selected>Normal</option>
+            <option value="multiply">Multiply</option>
+            <option value="screen">Screen</option>
+            <option value="overlay">Overlay</option>
+        </select>
+    </div>
+
+    <div style="position: fixed; bottom: 40px; left: 250px;">
+        <input type="color" id="penColor" value="#000000">
+    </div>
+
+    <div style="position: fixed; bottom: 40px; left: 320px;">
+        <button id="penBtn">ペン</button>
+        <button id="eraserBtn">消しゴム</button>
+    </div>
+
+
+
+    <script type="text/javascript" src="index.js"></script>
+</body>
+
+</html>
