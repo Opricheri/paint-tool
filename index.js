@@ -74,9 +74,14 @@ function addLayerInContainer() {
 }
 
 // === 描画関連 ===
+let zoom = 1; // 現在の倍率
+
 function getPos(e, canvas) {
     const rect = canvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    return {
+        x: (e.clientX - rect.left) / zoom,
+        y: (e.clientY - rect.top) /zoom
+    };
 }
 
 function startDraw(e) {
@@ -144,6 +149,76 @@ function renderAllLayers() {
 
     displayCtx.globalCompositeOperation = 'source-over';
 }
+
+
+let offsetX = 0;
+let offsetY = 0;
+
+const zoomInBtn = document.getElementById('zoomIn');
+const zoomOutBtn = document.getElementById('zoomOut');
+const zoomLabel = document.getElementById('zoomLabel');
+
+zoomInBtn.addEventListener('click', () => {
+    zoom *= 1.1;  // 10%拡大
+    updateZoom();
+});
+
+zoomOutBtn.addEventListener('click', () => {
+    zoom /= 1.1;  // 10%縮小
+    updateZoom();
+});
+
+
+function updateZoom() {
+    // 最大表示サイズを親コンテナに合わせて補正
+    const container = document.querySelector('.canvas-container');
+    const maxOffsetX = Math.max(0, (displayCanvas.width * zoom - container.clientWidth));
+    const maxOffsetY = Math.max(0, (displayCanvas.height * zoom - container.clientHeight));
+
+    // オフセットを枠内に制限
+    offsetX = Math.min(Math.max(offsetX, 0), maxOffsetX);
+    offsetY = Math.min(Math.max(offsetY, 0), maxOffsetY);
+
+    const transform = `translate(${-offsetX}px, ${-offsetY}px) scale(${zoom})`;
+    
+    displayCanvas.style.transform = transform;
+    layers.forEach(layer => {
+        layer.canvas.style.transform = transform;
+    });
+    bgCanvas.style.transform = transform;
+
+    displayCanvas.style.transformOrigin = 'top left';
+    layers.forEach(layer => layer.canvas.style.transformOrigin = 'top left');
+    bgCanvas.style.transformOrigin = 'top left';
+
+    zoomLabel.textContent = Math.round(zoom*100) + '%';
+}
+
+let isPanning = false;
+let startPanX, startPanY;
+
+displayCanvas.addEventListener('pointerdown', (e) => {
+    if (e.shiftKey) { // Shift押しながらドラッグでパン
+        isPanning = true;
+        drawing = false;
+        startPanX = e.clientX;
+        startPanY = e.clientY;
+    }
+});
+
+displayCanvas.addEventListener('pointermove', (e) => {
+    if (isPanning) {
+        offsetX -= (e.clientX - startPanX) / zoom;
+        offsetY -= (e.clientY - startPanY) / zoom;
+        startPanX = e.clientX;
+        startPanY = e.clientY;
+        updateZoom();
+    }
+});
+
+displayCanvas.addEventListener('pointerup', () => isPanning = false);
+displayCanvas.addEventListener('pointerleave', () => isPanning = false);
+
 
 // 最初のレイヤー追加
 addLayer();
