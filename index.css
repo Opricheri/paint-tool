@@ -9,10 +9,12 @@ body {
 
 .canvas-container {
     position: relative;
-    width: 600px;
-    height: 400px;
-    border: 2px solid #333;
+    width: 600px;   /* 固定幅 or レスポンシブに合わせる */
+    height: 400px;  /* 固定高さ */
+    overflow: hidden;  /* はみ出た部分を隠す */
+    border: 2px solid #000;
 }
+
 
 canvas {
     position: absolute;
