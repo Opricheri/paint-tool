@@ -84,6 +84,10 @@ function startDraw(e) {
     const pos = getPos(e, displayCanvas);
     lastX = pos.x;
     lastY = pos.y;
+
+    const ctx = layers[currentLayerIndex].ctx;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY); // ストローク開始位置
 }
 
 function draw(e) {
@@ -95,7 +99,7 @@ function draw(e) {
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.lineWidth = pressure * 50;
+    ctx.lineWidth = pressure * 8;
 
     if (tool === 'pen') {
         ctx.globalCompositeOperation = 'source-over';
@@ -105,8 +109,6 @@ function draw(e) {
         ctx.strokeStyle = 'rgba(0,0,0,1)'; // 実際の色は関係ない
     }
     
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
 
