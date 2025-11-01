@@ -1,0 +1,48 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: #eee;
+}
+
+.canvas-container {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    border: 2px solid #333;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 600px;
+    height: 400px;
+    touch-action: none;
+}
+
+#layerContainer button {
+  border: none;          /* ← 枠線を消す */
+  background: #eee;      /* 通常時の背景色 */
+  color: #000;           /* 文字色 */
+  padding: 5px 10px;     /* 少し余白を追加 */
+  margin-right: 5px;     /* ボタン間の隙間 */
+  border-radius: 4px;    /* 少し角を丸く */
+  cursor: pointer;       /* マウスカーソルをポインタに */
+}
+
+#layerContainer button:hover {
+  background: #ccc;      /* ホバー時に少し濃く */
+}
+
+#layerContainer button.active {
+  background: #c2c2c2ff; /* 選択中の色 */
+  color: #fff;
+  border: none;          /* 念のため明示 */
+}
+
+#layerEffectSelector select {
+    font-size: 1rem;
+}
