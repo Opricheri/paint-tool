@@ -162,23 +162,23 @@ function startDraw(e) {
     const pos = getPos(e, displayCanvas);
     lastX = pos.x;
     lastY = pos.y;
-
-    const ctx = layers[currentLayerIndex].ctx;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY); // ストローク開始位置
 }
 
 function draw(e) {
     if (!drawing) return;
 
-    const ctx = layers[currentLayerIndex].ctx;
     const { x, y } = getPos(e, displayCanvas);
     const pressure = e.pressure || 0.5;
+    const ctx = layers[currentLayerIndex].ctx;
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.lineWidth = pressure * penSizeValue;
 
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.lineWidth = pressure * penSizeValue;
+    
     if (tool === 'pen') {
         ctx.globalCompositeOperation = 'source-over';
         ctx.strokeStyle = penColorInput.value;
@@ -186,13 +186,8 @@ function draw(e) {
         ctx.globalCompositeOperation = 'destination-out'; // 消しゴムモード
         ctx.strokeStyle = 'rgba(0,0,0,1)'; // 実際の色は関係ない
     }
-
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(x, y);
+    
     ctx.stroke();
-    ctx.closePath();
-
     lastX = x;
     lastY = y;
 
