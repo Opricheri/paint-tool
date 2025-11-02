@@ -157,11 +157,14 @@ function getPos(e, canvas) {
     };
 }
 
+let strokeSegments = [];
+
 function startDraw(e) {
     drawing = true;
     const pos = getPos(e, displayCanvas);
     lastX = pos.x;
     lastY = pos.y;
+    strokeSegments = [];
 }
 
 function draw(e) {
@@ -169,15 +172,17 @@ function draw(e) {
 
     const { x, y } = getPos(e, displayCanvas);
     const pressure = e.pressure || 0.5;
-    const ctx = layers[currentLayerIndex].ctx;
 
+    strokeSegments.push({ x1: lastX, y1: lastY, x2: x, y2: y, width: pressure * penSizeValue })
+    
+    const ctx = layers[currentLayerIndex].ctx;
+    const seg = strokeSegments[strokeSegments.length - 1];
+    ctx.beginPath();
+    ctx.moveTo(seg.x1, seg.y1);
+    ctx.lineTo(seg.x2, seg.y2);
+    ctx.lineWidth = seg.width;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(x, y);
-    ctx.lineWidth = pressure * penSizeValue;
     
     if (tool === 'pen') {
         ctx.globalCompositeOperation = 'source-over';
@@ -188,6 +193,7 @@ function draw(e) {
     }
     
     ctx.stroke();
+    
     lastX = x;
     lastY = y;
 
