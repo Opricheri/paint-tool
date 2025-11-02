@@ -28,6 +28,7 @@ body {
   overflow: hidden;
   border: 2px solid #000;
   background-color: #717171;
+  touch-action: none;
 }
 
 
@@ -38,6 +39,8 @@ canvas {
   width: 400px;
   height: 400px;
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #layerContainer {
