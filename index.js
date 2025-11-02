@@ -5,17 +5,83 @@ const bgCtx = bgCanvas.getContext("2d");
 bgCtx.fillStyle = "#fff";
 bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
 
+bgCanvas.width = 400 * 2;
+bgCanvas.height = 400 * 2;
+bgCanvas.style.width = '400px';
+bgCanvas.style.height = '400px';
+bgCtx.scale(2, 2);
+
+
+const penSize = document.getElementById('penSize');
+const currentPenSize = document.getElementById('currentPenSizeValue');
+
+let penSizeValue = 10;
+
+
+function sliderToPenSize(sliderValue) {
+    // min 0.1, max 1000 の対数変換
+    return Math.pow(10, sliderValue);
+}
+
+function penSizeToSlider(penSizeValue) {
+    return Math.log10(penSizeValue);
+}
+
+penSize.value = penSizeToSlider(penSizeValue);
+currentPenSize.textContent = penSizeValue.toFixed(1);
+
+penSize.addEventListener('input', () => {
+    const value = sliderToPenSize(penSize.value);
+    currentPenSize.textContent = value.toFixed(1);
+    penSizeValue = value;
+});
+
+
+const penSizeButtons = document.querySelectorAll('#penSizeSelector button');
+
+penSizeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const size = parseFloat(btn.dataset.size);
+        penSizeValue = size;
+
+        // スライダーも更新
+        penSize.value = penSizeToSlider(size);
+        currentPenSize.textContent = size.toFixed(1);
+    });
+});
+
+
+const colorButtons = document.querySelectorAll('#colorSelector button');
+
+colorButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const color = btn.getAttribute('data-color');
+        penColorInput.value = color;  // カラーピッカーと同期
+    });
+});
+
+
+
 const layers = [];
 let tool = 'pen';
 let currentLayerIndex = 0;
 let drawing = false;
 let lastX, lastY;
 
+const currentPen = document.getElementById("currentPen");
+
 const penColorInput = document.getElementById('penColor');
 const layerEffectsSelect = document.getElementById('layerEffects');
 
-document.getElementById('penBtn').addEventListener('click', () => tool = 'pen');
-document.getElementById('eraserBtn').addEventListener('click', () => tool = 'eraser');
+document.getElementById('penBtn').addEventListener('click', () => {
+    currentPen.textContent = 'Pen';
+    tool = 'pen';
+})
+
+document.getElementById('eraserBtn').addEventListener('click', () => {
+    currentPen.textContent = 'Eraser';
+    tool = 'eraser';
+})
 
 // 表示用キャンバス（常に最前面）
 const displayCanvas = document.createElement('canvas');
@@ -33,6 +99,7 @@ displayCanvas.addEventListener("pointerdown", startDraw);
 displayCanvas.addEventListener("pointermove", draw);
 displayCanvas.addEventListener("pointerup", endDraw);
 displayCanvas.addEventListener("pointerleave", endDraw);
+
 
 // === レイヤー追加 ===
 function addLayer() {
@@ -57,9 +124,13 @@ function addLayer() {
 function setActiveLayer(index) {
     if (index >= 0 && index < layers.length) {
         currentLayerIndex = index;
-        document.querySelectorAll('#layerContainer button').forEach((btn, i) => {
-            btn.classList.toggle('active', i === index);
+
+        const buttons = document.querySelectorAll('#layerContainer button');
+        buttons.forEach((btn, i) => {
+            const btnIndex = parseInt(btn.textContent.replace('レイヤー', ''));
+            btn.classList.toggle('active', btnIndex === index);
         });
+
         layerEffectsSelect.value = layers[currentLayerIndex].effect;
     }
 }
@@ -70,7 +141,7 @@ function addLayerInContainer() {
     const btn = document.createElement('button');
     btn.textContent = `レイヤー${index}`;
     btn.addEventListener('click', () => setActiveLayer(index));
-    layerContainer.appendChild(btn);
+    layerContainer.insertBefore(btn, layerContainer.firstChild);
 }
 
 // === 描画関連 ===
@@ -78,9 +149,11 @@ let zoom = 1; // 現在の倍率
 
 function getPos(e, canvas) {
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     return {
-        x: (e.clientX - rect.left) / zoom,
-        y: (e.clientY - rect.top) /zoom
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
     };
 }
 
@@ -104,7 +177,7 @@ function draw(e) {
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.lineWidth = pressure * 8;
+    ctx.lineWidth = pressure * penSizeValue;
 
     if (tool === 'pen') {
         ctx.globalCompositeOperation = 'source-over';
@@ -113,7 +186,7 @@ function draw(e) {
         ctx.globalCompositeOperation = 'destination-out'; // 消しゴムモード
         ctx.strokeStyle = 'rgba(0,0,0,1)'; // 実際の色は関係ない
     }
-    
+
     ctx.lineTo(x, y);
     ctx.stroke();
 
@@ -180,7 +253,7 @@ function updateZoom() {
     offsetY = Math.min(Math.max(offsetY, 0), maxOffsetY);
 
     const transform = `translate(${-offsetX}px, ${-offsetY}px) scale(${zoom})`;
-    
+
     displayCanvas.style.transform = transform;
     layers.forEach(layer => {
         layer.canvas.style.transform = transform;
@@ -191,7 +264,7 @@ function updateZoom() {
     layers.forEach(layer => layer.canvas.style.transformOrigin = 'top left');
     bgCanvas.style.transformOrigin = 'top left';
 
-    zoomLabel.textContent = Math.round(zoom*100) + '%';
+    zoomLabel.textContent = Math.round(zoom * 100) + '%';
 }
 
 let isPanning = false;
@@ -218,6 +291,39 @@ displayCanvas.addEventListener('pointermove', (e) => {
 
 displayCanvas.addEventListener('pointerup', () => isPanning = false);
 displayCanvas.addEventListener('pointerleave', () => isPanning = false);
+
+
+
+document.getElementById("saveJPG").addEventListener('click', () => {
+    const dataURL = displayCanvas.toDataURL('image/jpeg', 1);
+
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = 'undefined.jpg';
+    link.click();
+})
+
+
+const loadImageInput = document.getElementById('loadImage');
+
+loadImageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            // 現在のアクティブレイヤーに描画
+            const ctx = layers[currentLayerIndex].ctx;
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
+            renderAllLayers();
+        }
+        img.src = event.target.result;
+    }
+    reader.readAsDataURL(file);
+});
 
 
 // 最初のレイヤー追加
