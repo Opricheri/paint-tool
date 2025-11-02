@@ -187,8 +187,11 @@ function draw(e) {
         ctx.strokeStyle = 'rgba(0,0,0,1)'; // 実際の色は関係ない
     }
 
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
+    ctx.closePath();
 
     lastX = x;
     lastY = y;
