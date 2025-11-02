@@ -334,10 +334,9 @@ loadImageInput.addEventListener('change', (e) => {
     c.addEventListener('contextmenu', e => e.preventDefault());
 });
 
-displayCanvas.addEventListener('pointerdown', (e) => {
-    e.preventDefault();  // 長押しによるコピー・選択を阻止
-    startDraw(e);
-});
+displayCanvas.addEventListener('contextmenu', e => e.preventDefault());
+displayCanvas.addEventListener('pointerdown', e => e.preventDefault());
+displayCanvas.addEventListener('pointermove', e => e.preventDefault());
 
 // 最初のレイヤー追加
 addLayer();
