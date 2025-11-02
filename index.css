@@ -1,50 +1,134 @@
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background: #eee;
 }
 
+.main-container {
+  display: flex;
+  gap: 1rem;
+  height: 100vh;
+}
+
+.sidebar {
+  flex: 3;
+  min-width: 200px;
+  overflow-y: auto;
+}
+
+
 .canvas-container {
-    position: relative;
-    width: 600px;   /* 固定幅 or レスポンシブに合わせる */
-    height: 400px;  /* 固定高さ */
-    overflow: hidden;  /* はみ出た部分を隠す */
-    border: 2px solid #000;
+  flex: 7;
+  min-width: 400px;
+  min-height: 400px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #000;
+  background-color: #717171;
 }
 
 
 canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 600px;
-    height: 400px;
-    touch-action: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400px;
+  height: 400px;
+  touch-action: none;
+}
+
+#layerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 140px;
+  overflow-y: auto;
+  gap: 0.5rem;
+  padding: 0.5rem;
 }
 
 #layerContainer button {
-  border: none;          /* ← 枠線を消す */
-  background: #eee;      /* 通常時の背景色 */
-  color: #000;           /* 文字色 */
-  padding: 5px 10px;     /* 少し余白を追加 */
-  margin-right: 5px;     /* ボタン間の隙間 */
-  border-radius: 4px;    /* 少し角を丸く */
-  cursor: pointer;       /* マウスカーソルをポインタに */
+  background: var(--color-third);
+  padding: 5px 10px;
+  cursor: pointer;
+  color: white;
+  width: auto;
+  font-size: 0.6rem;
+  text-align: center;
+  min-width: 5.5rem;
 }
 
 #layerContainer button:hover {
-  background: #ccc;      /* ホバー時に少し濃く */
+  background: #ccc;
+  /* ホバー時に少し濃く */
 }
 
 #layerContainer button.active {
-  background: #c2c2c2ff; /* 選択中の色 */
+  background: #c2c2c2ff;
+  /* 選択中の色 */
   color: #fff;
-  border: none;          /* 念のため明示 */
+  border: none;
+  /* 念のため明示 */
 }
 
 #layerEffectSelector select {
-    font-size: 1rem;
+  font-size: 1rem;
+}
+
+#addLayer {
+  font-weight: bolder;
+}
+
+#penSizeSelector button {
+  font-size: 0.5rem;
+  font-weight: bolder;
+}
+
+/* スライダー全体 */
+#penSize {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #ddd;
+  outline: none;
+}
+
+#penSize::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #6c8595;
+  cursor: pointer;
+
+  margin-top: -3px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+#penSize::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #ddd;
+}
+
+
+#loadImage {
+  display: none;
+}
+
+.custom-file-btn {
+  display: inline-block;
+  background-color: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  margin-top: 3px;
+  transition: background 0.2s;
 }
