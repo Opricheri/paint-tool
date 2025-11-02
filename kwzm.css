@@ -1,0 +1,110 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  color: #222;
+  background: #f9f9f9;
+}
+
+:root {
+  --color-primary: #7799ba;
+  --color-secondary: #555;
+  --color-third: #eee;
+  --color-bg: #fff;
+  --color-border: #ddd;
+  --radius: 6px;
+  --space: 1rem;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space);
+}
+
+.flex {
+  display: flex;
+  gap: var(--space);
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 2rem; }
+
+/* components.css */
+button {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #5e7a93;
+}
+
+.card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.card.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+select {
+    font-size: 0.9rem;        /* フォントサイズ */
+    padding: 4px 8px;         /* 内側余白 */
+    border-radius: 4px;       /* 角丸 */
+    border: 1px solid #ccc;   /* 枠線 */
+    background-color: #fff;   /* 背景色 */
+    color: #222;              /* 文字色 */
+    cursor: pointer;          /* カーソルをポインタに */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+select:hover {
+    border-color: var(--color-primary);
+}
+
+select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(77, 119, 186, 0.3);
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0.5rem;
+  }
+}
