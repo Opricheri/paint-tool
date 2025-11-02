@@ -5,47 +5,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>レイヤー対応お絵かきアプリ</title>
+    <link rel="stylesheet" href="kwzm.css">
     <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
-    <div class="canvas-container">
-        <canvas id="bg" width="600" height="400"></canvas>
+    <div class="container main-container">
+        <div class="card sidebar">
+            <div class="card">
+                <button id="saveJPG">Save as jpg</button>
+                <label class="custom-file-btn" for="loadImage">Open file</label>
+                <input type="file" id="loadImage" accept="image/*">
+            </div>
+
+            <div class="card">
+                <div class="tool-group">
+                    <button id="addLayer" onclick="addLayer()">+</button>
+                    <label for="layerEffects"></label>
+                    <select id="layerEffects">
+                        <option value="source-over" selected>Normal</option>
+                        <option value="multiply">Multiply</option>
+                        <option value="screen">Screen</option>
+                        <option value="overlay">Overlay</option>
+                    </select>
+                </div>
+                <hr style="margin: 3px;">
+                <div class="tool-group" id="layerContainer"></div>
+            </div>
+
+            <div class="card toolbar">
+                <input type="color" id="penColor" value="#000000">
+                <div class="tool-group card">
+                    <div id="colorSelector">
+                        <button data-color="#ff0000" style="background:#ff0000;"></button>
+                        <button data-color="#00ff00" style="background:#00ff00;"></button>
+                        <button data-color="#0000ff" style="background:#0000ff;"></button>
+                        <button data-color="#ffff00" style="background:#ffff00;"></button>
+                        <button data-color="#ff00ff" style="background:#ff00ff;"></button>
+                        <button data-color="#00ffff" style="background:#00ffff;"></button>
+                        <button data-color="#000000" style="background:#000000;"></button>
+                        <button data-color="#ffffff" style="background:#ffffff; border:1px solid #ccc;"></button>
+                    </div>
+                </div>
+                
+                <p id="currentPen">Pen</p>
+                <div class="tool-group">
+                    <button id="penBtn">Pen</button>
+                    <button id="eraserBtn">Eraser</button>
+                </div>
+
+                <div class="tool-group">
+                    <div id="slider">
+                        <label for="penSize"><span id="currentPenSizeValue"></span></label>
+                        <input id="penSize" name="penSize" type="range" value="1" step="0.01" max="3" min="-1">
+                    </div>
+                </div>
+
+                <div class="tool-group card">
+                    <div id="penSizeSelector">
+                        <button data-size="0.1">0.1</button>
+                        <button data-size="1">1</button>
+                        <button data-size="5">5</button>
+                        <button data-size="10">10</button>
+                        <button data-size="50">50</button>
+                        <button data-size="100">100</button>
+                    </div>
+                </div>
+
+                <div class="tool-group">
+                    <button id="zoomIn">+</button>
+                    <button id="zoomOut">-</button>
+                    <span id="zoomLabel">100%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="bg"></canvas>
+        </div>
     </div>
-
-    <div style="position: fixed; bottom: 40px; left: 20px;">
-        <button onclick="addLayer()">＋レイヤー追加</button>
-    </div>
-
-    <div id="layerContainer" style="position: fixed; bottom: 10px; left: 20px;">
-    </div>
-
-    <div id="layerEffectSelector" style="position: fixed; bottom: 40px; left: 150px;">
-        <select id="layerEffects">
-            <option value="source-over" selected>Normal</option>
-            <option value="multiply">Multiply</option>
-            <option value="screen">Screen</option>
-            <option value="overlay">Overlay</option>
-        </select>
-    </div>
-
-    <div style="position: fixed; bottom: 40px; left: 250px;">
-        <input type="color" id="penColor" value="#000000">
-    </div>
-
-    <div style="position: fixed; bottom: 40px; left: 320px;">
-        <button id="penBtn">ペン</button>
-        <button id="eraserBtn">消しゴム</button>
-    </div>
-
-    <div id="zoomControls" style="position: fixed; bottom: 40px; left: 450px;">
-        <button id="zoomIn">拡大</button>
-        <button id="zoomOut">縮小</button>
-        <span id="zoomLabel">100%</span>
-    </div>
-
-
-
 
     <script type="text/javascript" src="index.js"></script>
 </body>
