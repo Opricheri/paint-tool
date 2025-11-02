@@ -334,6 +334,7 @@ loadImageInput.addEventListener('change', (e) => {
     c.addEventListener('contextmenu', e => e.preventDefault());
 });
 
+document.addEventListener('contextmenu', e => e.preventDefault());
 displayCanvas.addEventListener('contextmenu', e => e.preventDefault());
 displayCanvas.addEventListener('pointerdown', e => e.preventDefault());
 displayCanvas.addEventListener('pointermove', e => e.preventDefault());
