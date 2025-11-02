@@ -193,7 +193,7 @@ function draw(e) {
     }
     
     ctx.stroke();
-    
+
     lastX = x;
     lastY = y;
 
@@ -329,6 +329,15 @@ loadImageInput.addEventListener('change', (e) => {
     reader.readAsDataURL(file);
 });
 
+
+[bgCanvas, displayCanvas, ...layers.map(l => l.canvas)].forEach(c => {
+    c.addEventListener('contextmenu', e => e.preventDefault());
+});
+
+displayCanvas.addEventListener('pointerdown', (e) => {
+    e.preventDefault();  // 長押しによるコピー・選択を阻止
+    startDraw(e);
+});
 
 // 最初のレイヤー追加
 addLayer();
