@@ -28,16 +28,20 @@ function penSizeToSlider(penSizeValue) {
 }
 
 penSize.value = penSizeToSlider(penSizeValue);
-currentPenSize.textContent = penSizeValue.toFixed(1);
+currentPenSize.value = penSizeValue.toFixed(1);
 
 penSize.addEventListener('input', () => {
     const value = sliderToPenSize(penSize.value);
-    currentPenSize.textContent = value.toFixed(1);
+    currentPenSize.value = value.toFixed(1);
     penSizeValue = value;
 });
 
+currentPenSize.addEventListener('input', (e) => {
+    penSizeValue = e.target.value;
+})
 
 const penSizeButtons = document.querySelectorAll('#penSizeSelector button');
+
 
 penSizeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -46,19 +50,31 @@ penSizeButtons.forEach(btn => {
 
         // スライダーも更新
         penSize.value = penSizeToSlider(size);
-        currentPenSize.textContent = size.toFixed(1);
+        currentPenSize.value = size.toFixed(1);
     });
 });
 
 
-const colorButtons = document.querySelectorAll('#colorSelector button');
+const penColorInput = document.getElementById('penColor');
+const colorPreview = document.getElementById("colorPreview");
+const colorCode = document.getElementById('colorCode');
+const colorSelector = document.getElementById('colorSelector');
 
-colorButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const color = btn.getAttribute('data-color');
-        penColorInput.value = color;  // カラーピッカーと同期
-    });
+colorPreview.style.backgroundColor = penColor.value;
+
+penColorInput.addEventListener("input", (e) => {
+    const color = e.target.value;
+    colorPreview.style.backgroundColor = color;
+    colorCode.textContent = color;
 });
+
+colorSelector.addEventListener('change', function () {
+    const color = this.value;
+    penColorInput.value = color;  // カラーピッカーと同期
+    colorPreview.style.backgroundColor = color;
+    colorCode.textContent = color;
+});
+
 
 
 
@@ -70,18 +86,47 @@ let lastX, lastY;
 
 const currentPen = document.getElementById("currentPen");
 
-const penColorInput = document.getElementById('penColor');
-const layerEffectsSelect = document.getElementById('layerEffects');
+const penBtn = document.getElementById('penBtn');
+const eraserBtn = document.getElementById('eraserBtn');
+const brushBtn = document.getElementById('brushBtn');
+const sprayBtn = document.getElementById('sprayBtn');
 
-document.getElementById('penBtn').addEventListener('click', () => {
+const brushes = [penBtn, eraserBtn, brushBtn, sprayBtn];
+
+function setActiveBrush(selectedBrush) {
+    brushes.forEach(brush => brush.classList.remove('active'));
+    selectedBrush.classList.add('active');
+}
+
+penBtn.addEventListener('click', () => {
     currentPen.textContent = 'Pen';
     tool = 'pen';
+    setActiveBrush(penBtn);
 })
 
-document.getElementById('eraserBtn').addEventListener('click', () => {
+eraserBtn.addEventListener('click', () => {
     currentPen.textContent = 'Eraser';
     tool = 'eraser';
+    setActiveBrush(eraserBtn);
 })
+
+brushBtn.addEventListener('click', () => {
+    currentPen.textContent = 'Brush';
+    tool = 'brush';
+    setActiveBrush(brushBtn);
+})
+
+sprayBtn.addEventListener('click', () => {
+    currentPen.textContent = 'Spray';
+    tool = 'spray';
+    setActiveBrush(sprayBtn);
+})
+
+
+setActiveBrush(penBtn);
+
+
+
 
 // 表示用キャンバス（常に最前面）
 const displayCanvas = document.createElement('canvas');
@@ -119,6 +164,9 @@ function addLayer() {
     setActiveLayer(layers.length - 1);
     renderAllLayers();
 }
+
+
+const layerEffectsSelect = document.getElementById('layerEffects');
 
 // === レイヤー操作 ===
 function setActiveLayer(index) {
@@ -174,7 +222,7 @@ function draw(e) {
     const pressure = e.pressure || 0.5;
 
     strokeSegments.push({ x1: lastX, y1: lastY, x2: x, y2: y, width: pressure * penSizeValue })
-    
+
     const ctx = layers[currentLayerIndex].ctx;
     const seg = strokeSegments[strokeSegments.length - 1];
     ctx.beginPath();
@@ -183,15 +231,32 @@ function draw(e) {
     ctx.lineWidth = seg.width;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    
-    if (tool === 'pen') {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = penColorInput.value;
-    } else if (tool === 'eraser') {
-        ctx.globalCompositeOperation = 'destination-out'; // 消しゴムモード
-        ctx.strokeStyle = 'rgba(0,0,0,1)'; // 実際の色は関係ない
+
+
+    switch (tool) {
+        case 'pen':
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = penColorInput.value;
+            break;
+        case 'eraser':
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.strokeStyle = 'rgba(0,0,0,1)';
+            break;
+        case 'brush':
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = penColorInput.value;
+            ctx.strokeStyle = penColorInput.value;
+            drawTexturedBrush(ctx, seg.x1, seg.y1, seg.x2, seg.y2, seg.width);
+            ctx.globalCompositeOperation = 'source-over';
+            break;
+        case 'spray':
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = penColorInput.value;
+            ctx.strokeStyle = penColorInput.value;
+            drawTexturedBrush(ctx, seg.x1, seg.y1, seg.x2, seg.y2, seg.width, { density: 20, shape: 'triangle', scatter: 30 });
+            break;
     }
-    
+
     ctx.stroke();
 
     lastX = x;
@@ -206,6 +271,65 @@ function endDraw() {
     lastY = undefined;
     renderAllLayers();
 }
+
+
+
+/**
+ * drawTexturedBrush
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} x1 - 始点X
+ * @param {number} y1 - 始点Y
+ * @param {number} x2 - 終点X
+ * @param {number} y2 - 終点Y
+ * @param {number} width - ブラシ幅
+ * @param {object} options - ブラシオプション
+ *    options.density: 点の密度 (1~10くらい)
+ *    options.shape: 'circle' | 'square'
+ *    options.scatter: 散布範囲 (px)
+ */
+function drawTexturedBrush(ctx, x1, y1, x2, y2, width, options = {}) {
+    const density = options.density || 5;
+    const shape = options.shape || 'circle';
+    const scatter = options.scatter || 2;
+
+    // 線分の長さを計算
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    for (let i = 0; i < distance; i += 1) {
+        // 線上の位置
+        const t = i / distance;
+        const x = x1 + dx * t;
+        const y = y1 + dy * t;
+
+        // 点を複数配置
+        for (let j = 0; j < density; j++) {
+            const offsetX = (Math.random() - 0.5) * width * scatter;
+            const offsetY = (Math.random() - 0.5) * width * scatter;
+
+            if (shape === 'circle') {
+                ctx.beginPath();
+                ctx.arc(x + offsetX, y + offsetY, width / 2, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (shape === 'square') {
+                ctx.fillRect(x + offsetX - width / 2, y + offsetY - width / 2, width, width);
+            } else if (shape === 'triangle') {
+                const px = x + offsetX;
+                const py = y + offsetY;
+                const height = width * Math.sqrt(3) / 2; // 正三角形の高さ
+                ctx.beginPath();
+                ctx.moveTo(px, py - height / 2);          // 上の頂点
+                ctx.lineTo(px - width / 2, py + height / 2); // 左下
+                ctx.lineTo(px + width / 2, py + height / 2); // 右下
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+    }
+}
+
+
 
 // === レイヤー効果変更 ===
 layerEffectsSelect.addEventListener('change', () => {
@@ -315,9 +439,9 @@ loadImageInput.addEventListener('change', (e) => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
             // 現在のアクティブレイヤーに描画
             const ctx = layers[currentLayerIndex].ctx;
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -333,6 +457,7 @@ loadImageInput.addEventListener('change', (e) => {
 [bgCanvas, displayCanvas, ...layers.map(l => l.canvas)].forEach(c => {
     c.addEventListener('contextmenu', e => e.preventDefault());
 });
+
 
 document.addEventListener('contextmenu', e => e.preventDefault());
 displayCanvas.addEventListener('contextmenu', e => e.preventDefault());
