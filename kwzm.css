@@ -46,7 +46,6 @@ body {
 .mt-2 { margin-top: 1rem; }
 .mt-3 { margin-top: 2rem; }
 
-/* components.css */
 button {
   background: var(--color-primary);
   color: white;
@@ -67,13 +66,6 @@ button:hover {
   border-radius: var(--radius);
   padding: var(--space);
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-.card.toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 1rem;
 }
 
 .tool-group {
@@ -101,6 +93,11 @@ select:focus {
     border-color: var(--color-primary);
     outline: none;
     box-shadow: 0 0 0 2px rgba(77, 119, 186, 0.3);
+}
+
+hr {
+  margin: 4px 0 4px 0;
+  border: 1px solid var(--color-third);
 }
 
 @media (max-width: 600px) {
