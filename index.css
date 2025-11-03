@@ -21,14 +21,16 @@ body {
 }
 
 .sidebar {
-  flex: 3;
-  min-width: 200px;
+  position: fixed;
   overflow-y: auto;
+  z-index: 1000;
+  width: 500px;
+  height: 100px;
+  top: 0;
+  left: 0;
 }
 
-
 .canvas-container {
-  flex: 7;
   min-width: 400px;
   min-height: 400px;
   position: relative;
@@ -96,6 +98,11 @@ canvas {
   font-weight: bolder;
 }
 
+.brushes button.active {
+  background: #5e7a93;
+}
+
+
 #penSizeSelector button {
   font-size: 0.5rem;
   font-weight: bolder;
@@ -130,19 +137,81 @@ canvas {
   background: #ddd;
 }
 
+#penColor {
+  display: none;
+}
+
+#colorCode {
+  border: 2px solid #ccc;
+  border-radius: var(--radius);
+  padding: 2px;
+  font-size: 0.9rem;
+}
+
+#colorSelector {
+  border: 2px solid #ccc;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+}
+
+#colorSelector:hover {
+  border: 2px solid #b3b3b3;
+}
+
+.color-btn {
+  display: inline-flex;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+
+  border: 2px solid #ccc;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+}
+
+.color-btn:hover {
+  transform: scale(1.05);
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
 #loadImage {
   display: none;
 }
 
+button,
 .custom-file-btn {
-  display: inline-block;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--color-primary);
-  color: white;
-  cursor: pointer;
-  border: none;
+  color: #fff;
+  padding: 0 1rem;
   border-radius: var(--radius);
-  padding: 0.5rem 1rem;
-  margin-top: 3px;
-  transition: background 0.2s;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+button:hover,
+.custom-file-btn:hover {
+  background: #5e7a93;
+}
+
+#penSize { width: 70px; }
+
+#currentPen { font-size: 0.8rem; }
+
+#currentPenSizeValue {
+  width: 3.5rem;
+  border: none;
+  outline: none;
 }
