@@ -68,6 +68,35 @@ button:hover {
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 200px;
+  max-width: 90%;
+  height: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  position: relative;
+  pointer-events: auto;
+}
+
+
+
 .tool-group {
     display: flex;
     align-items: center;
@@ -100,7 +129,7 @@ hr {
   border: 1px solid var(--color-third);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
   .container {
     padding: 0.5rem;
   }
