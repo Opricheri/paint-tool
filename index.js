@@ -60,7 +60,17 @@ const colorPreview = document.getElementById("colorPreview");
 const colorCode = document.getElementById('colorCode');
 const colorSelector = document.getElementById('colorSelector');
 
-colorPreview.style.backgroundColor = penColor.value;
+colorPreview.style.backgroundColor = penColorInput.value;
+
+
+// For Safari
+colorPreview.addEventListener("click", () => {
+  penColorInput.click();
+});
+colorPreview.addEventListener("touchstart", () => {
+  penColorInput.click();
+});
+//
 
 penColorInput.addEventListener("input", (e) => {
     const color = e.target.value;
@@ -90,13 +100,27 @@ const penBtn = document.getElementById('penBtn');
 const eraserBtn = document.getElementById('eraserBtn');
 const brushBtn = document.getElementById('brushBtn');
 const sprayBtn = document.getElementById('sprayBtn');
+const moveBtn = document.getElementById('moveBtn');
 
-const brushes = [penBtn, eraserBtn, brushBtn, sprayBtn];
+const brushes = [penBtn, eraserBtn, brushBtn, sprayBtn, moveBtn];
 
 function setActiveBrush(selectedBrush) {
     brushes.forEach(brush => brush.classList.remove('active'));
     selectedBrush.classList.add('active');
 }
+
+function setActiveTool(tool) {
+    if (tool === 'move') {
+        container.classList.add('move-cursor');
+    } else {
+        container.classList.remove('move-cursor');
+    }
+    currentPen.textContent = tool.charAt(0).toUpperCase() + tool.slice(1);
+}
+
+moveBtn.addEventListener('click', () => setActiveTool('move'));
+penBtn.addEventListener('click', () => setActiveTool('pen'));
+
 
 penBtn.addEventListener('click', () => {
     currentPen.textContent = 'Pen';
@@ -121,6 +145,13 @@ sprayBtn.addEventListener('click', () => {
     tool = 'spray';
     setActiveBrush(sprayBtn);
 })
+
+moveBtn.addEventListener('click', () => {
+    currentPen.textContent = 'Move';
+    tool = 'move';
+    setActiveBrush(moveBtn);
+})
+
 
 
 setActiveBrush(penBtn);
@@ -371,21 +402,22 @@ zoomOutBtn.addEventListener('click', () => {
 
 
 function updateZoom() {
-    // 最大表示サイズを親コンテナに合わせて補正
     const container = document.querySelector('.canvas-container');
-    const maxOffsetX = Math.max(0, (displayCanvas.width * zoom - container.clientWidth));
-    const maxOffsetY = Math.max(0, (displayCanvas.height * zoom - container.clientHeight));
 
-    // オフセットを枠内に制限
-    offsetX = Math.min(Math.max(offsetX, 0), maxOffsetX);
-    offsetY = Math.min(Math.max(offsetY, 0), maxOffsetY);
+    const canvasWidth = displayCanvas.width * zoom;
+    const canvasHeight = displayCanvas.height * zoom;
+
+    const minOffsetX = Math.min(0, container.clientWidth - canvasWidth);
+    const minOffsetY = Math.min(0, container.clientHeight - canvasHeight);
+    const maxOffsetX = Math.max(0, canvasWidth - container.clientWidth);
+    const maxOffsetY = Math.max(0, canvasHeight - container.clientHeight);
+
+    offsetX = Math.min(Math.max(offsetX, minOffsetX), maxOffsetX);
+    offsetY = Math.min(Math.max(offsetY, minOffsetY), maxOffsetY);
 
     const transform = `translate(${-offsetX}px, ${-offsetY}px) scale(${zoom})`;
-
     displayCanvas.style.transform = transform;
-    layers.forEach(layer => {
-        layer.canvas.style.transform = transform;
-    });
+    layers.forEach(layer => layer.canvas.style.transform = transform);
     bgCanvas.style.transform = transform;
 
     displayCanvas.style.transformOrigin = 'top left';
@@ -419,6 +451,40 @@ displayCanvas.addEventListener('pointermove', (e) => {
 
 displayCanvas.addEventListener('pointerup', () => isPanning = false);
 displayCanvas.addEventListener('pointerleave', () => isPanning = false);
+
+
+
+displayCanvas.addEventListener('pointerdown', (e) => {
+    if (tool === 'move') {
+        isPanning = true;
+        drawing = false;
+        startPanX = e.clientX;
+        startPanY = e.clientY;
+    } else {
+        startDraw(e);
+    }
+});
+
+displayCanvas.addEventListener('pointermove', (e) => {
+    if (isPanning && tool === 'move') {
+        offsetX -= (e.clientX - startPanX) / zoom;
+        offsetY -= (e.clientY - startPanY) / zoom;
+        startPanX = e.clientX;
+        startPanY = e.clientY;
+        updateZoom();
+    } else if (drawing) {
+        draw(e);
+    }
+});
+
+displayCanvas.addEventListener('pointerup', () => {
+    if (tool === 'move') isPanning = false;
+    else endDraw();
+});
+displayCanvas.addEventListener('pointerleave', () => {
+    if (tool === 'move') isPanning = false;
+    else endDraw();
+});
 
 
 
