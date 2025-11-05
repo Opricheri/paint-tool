@@ -371,13 +371,19 @@ layerEffectsSelect.addEventListener('change', () => {
 // === 全レイヤー描画（リアルタイム合成） ===
 function renderAllLayers() {
     displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
+
+    // 背景を白で塗る
     displayCtx.fillStyle = "#fff";
     displayCtx.fillRect(0, 0, displayCanvas.width, displayCanvas.height);
 
-    layers.forEach(layer => {
+    // 変更のあったレイヤーのみ再描画
+    for (let i = 0; i < layers.length; i++) {
+        const layer = layers[i];
+        if (!layer.dirty) continue;
         displayCtx.globalCompositeOperation = layer.effect || 'source-over';
         displayCtx.drawImage(layer.canvas, 0, 0);
-    });
+        layer.dirty = false;
+    }
 
     displayCtx.globalCompositeOperation = 'source-over';
 }
