@@ -159,9 +159,7 @@ canvas {
 @media not all and (min-resolution:.001dpcm) {
   @supports (-webkit-appearance:none) {
     #penColor {
-      display: block;
       position: absolute;
-      left: -9999px;
     }
   }
 }
