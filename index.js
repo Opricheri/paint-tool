@@ -246,8 +246,13 @@ function startDraw(e) {
     strokeSegments = [];
 }
 
+let lastDrawTime = 0;
 function draw(e) {
     if (!drawing) return;
+
+    const now = performance.now();
+    if (now - lastDrawTime < 16) return;
+    lastDrawTime = now;
 
     const { x, y } = getPos(e, displayCanvas);
     const pressure = e.pressure || 0.5;
