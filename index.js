@@ -319,46 +319,69 @@ function endDraw() {
  *    options.scatter: 散布範囲 (px)
  */
 function drawTexturedBrush(ctx, x1, y1, x2, y2, width, options = {}) {
-    const density = options.density || 5;
-    const shape = options.shape || 'circle';
-    const scatter = options.scatter || 2;
+  const density = options.density || 5;
+  const shape = options.shape || 'circle';
+  const scatter = options.scatter || 2;
+  const color = penColorInput.value;
 
-    // 線分の長さを計算
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+  const texture = createBrushTexture(shape, width, color);
 
-    for (let i = 0; i < distance; i += width / 2) {
-        // 線上の位置
-        const t = i / distance;
-        const x = x1 + dx * t;
-        const y = y1 + dy * t;
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // 点を複数配置
-        for (let j = 0; j < density; j++) {
-            const offsetX = (Math.random() - 0.5) * width * scatter;
-            const offsetY = (Math.random() - 0.5) * width * scatter;
+  for (let i = 0; i < distance; i += width / 2) {
+    const t = i / distance;
+    const x = x1 + dx * t;
+    const y = y1 + dy * t;
 
-            if (shape === 'circle') {
-                ctx.beginPath();
-                ctx.arc(x + offsetX, y + offsetY, width / 2, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (shape === 'square') {
-                ctx.fillRect(x + offsetX - width / 2, y + offsetY - width / 2, width, width);
-            } else if (shape === 'triangle') {
-                const px = x + offsetX;
-                const py = y + offsetY;
-                const height = width * Math.sqrt(3) / 2; // 正三角形の高さ
-                ctx.beginPath();
-                ctx.moveTo(px, py - height / 2);          // 上の頂点
-                ctx.lineTo(px - width / 2, py + height / 2); // 左下
-                ctx.lineTo(px + width / 2, py + height / 2); // 右下
-                ctx.closePath();
-                ctx.fill();
-            }
-        }
+    for (let j = 0; j < density; j++) {
+      const offsetX = (Math.random() - 0.5) * width * scatter;
+      const offsetY = (Math.random() - 0.5) * width * scatter;
+
+      ctx.drawImage(texture, x + offsetX - width, y + offsetY - width, width * 2, width * 2);
     }
+  }
 }
+
+const brushTextures = {};
+
+function createBrushTexture(shape, size, color = '#000') {
+  const key = `${shape}_${size}_${color}`;
+  if (brushTextures[key]) return brushTextures[key];
+
+  const off = document.createElement('canvas');
+  off.width = off.height = size * 2;
+  const ctx = off.getContext('2d');
+  ctx.fillStyle = color;
+
+  const cx = size;
+  const cy = size;
+  const w = size;
+
+  if (shape === 'circle') {
+    ctx.beginPath();
+    ctx.arc(cx, cy, w / 2, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (shape === 'square') {
+    ctx.fillRect(cx - w / 2, cy - w / 2, w, w);
+  } else if (shape === 'triangle') {
+    const h = w * Math.sqrt(3) / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - h / 2);
+    ctx.lineTo(cx - w / 2, cy + h / 2);
+    ctx.lineTo(cx + w / 2, cy + h / 2);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  brushTextures[key] = off;
+  return off;
+}
+
+
+
+
 
 
 
