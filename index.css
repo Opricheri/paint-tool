@@ -151,19 +151,6 @@ canvas {
   background: #ddd;
 }
 
-#penColor {
-  display: none;
-}
-
-
-@media not all and (min-resolution:.001dpcm) {
-  @supports (-webkit-appearance:none) {
-    #penColor {
-      position: absolute;
-    }
-  }
-}
-
 
 #colorCode {
   border: 2px solid #ccc;
