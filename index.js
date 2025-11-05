@@ -267,8 +267,9 @@ function draw(e) {
     switch (tool) {
         case 'pen':
             ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = penColorInput.value;
             ctx.strokeStyle = penColorInput.value;
-            ctx.stroke();
+            drawTexturedBrush(ctx, seg.x1, seg.y1, seg.x2, seg.y2, seg.width, { density: 1, shape: 'circle', scatter: 0.1 });
             break;
         case 'eraser':
             ctx.globalCompositeOperation = 'destination-out';
