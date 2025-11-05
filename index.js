@@ -328,7 +328,7 @@ function drawTexturedBrush(ctx, x1, y1, x2, y2, width, options = {}) {
     const dy = y2 - y1;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    for (let i = 0; i < distance; i += 1) {
+    for (let i = 0; i < distance; i += width / 2) {
         // 線上の位置
         const t = i / distance;
         const x = x1 + dx * t;
@@ -371,19 +371,13 @@ layerEffectsSelect.addEventListener('change', () => {
 // === 全レイヤー描画（リアルタイム合成） ===
 function renderAllLayers() {
     displayCtx.clearRect(0, 0, displayCanvas.width, displayCanvas.height);
-
-    // 背景を白で塗る
     displayCtx.fillStyle = "#fff";
     displayCtx.fillRect(0, 0, displayCanvas.width, displayCanvas.height);
 
-    // 変更のあったレイヤーのみ再描画
-    for (let i = 0; i < layers.length; i++) {
-        const layer = layers[i];
-        if (!layer.dirty) continue;
+    layers.forEach(layer => {
         displayCtx.globalCompositeOperation = layer.effect || 'source-over';
         displayCtx.drawImage(layer.canvas, 0, 0);
-        layer.dirty = false;
-    }
+    });
 
     displayCtx.globalCompositeOperation = 'source-over';
 }
