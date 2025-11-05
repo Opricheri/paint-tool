@@ -252,10 +252,11 @@ function draw(e) {
     const { x, y } = getPos(e, displayCanvas);
     const pressure = e.pressure || 0.5;
 
-    strokeSegments.push({ x1: lastX, y1: lastY, x2: x, y2: y, width: pressure * penSizeValue })
+    const seg = { x1: lastX, y1: lastY, x2: x, y2: y, width: pressure * penSizeValue };
+    strokeSegments.push(seg);
 
     const ctx = layers[currentLayerIndex].ctx;
-    const seg = strokeSegments[strokeSegments.length - 1];
+
     ctx.beginPath();
     ctx.moveTo(seg.x1, seg.y1);
     ctx.lineTo(seg.x2, seg.y2);
@@ -263,22 +264,22 @@ function draw(e) {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
-
     switch (tool) {
         case 'pen':
             ctx.globalCompositeOperation = 'source-over';
             ctx.strokeStyle = penColorInput.value;
+            ctx.stroke();
             break;
         case 'eraser':
             ctx.globalCompositeOperation = 'destination-out';
             ctx.strokeStyle = 'rgba(0,0,0,1)';
+            ctx.stroke();
             break;
         case 'brush':
             ctx.globalCompositeOperation = 'source-over';
             ctx.fillStyle = penColorInput.value;
             ctx.strokeStyle = penColorInput.value;
             drawTexturedBrush(ctx, seg.x1, seg.y1, seg.x2, seg.y2, seg.width);
-            ctx.globalCompositeOperation = 'source-over';
             break;
         case 'spray':
             ctx.globalCompositeOperation = 'source-over';
@@ -288,8 +289,6 @@ function draw(e) {
             break;
     }
 
-    ctx.stroke();
-
     lastX = x;
     lastY = y;
 
@@ -298,6 +297,7 @@ function draw(e) {
 
 function endDraw() {
     drawing = false;
+    strokeSegments = [];
     lastX = undefined;
     lastY = undefined;
     renderAllLayers();
@@ -319,69 +319,46 @@ function endDraw() {
  *    options.scatter: 散布範囲 (px)
  */
 function drawTexturedBrush(ctx, x1, y1, x2, y2, width, options = {}) {
-  const density = options.density || 5;
-  const shape = options.shape || 'circle';
-  const scatter = options.scatter || 2;
-  const color = penColorInput.value;
+    const density = options.density || 5;
+    const shape = options.shape || 'circle';
+    const scatter = options.scatter || 2;
 
-  const texture = createBrushTexture(shape, width, color);
+    // 線分の長さを計算
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const distance = Math.sqrt(dx * dx + dy * dy);
+    for (let i = 0; i < distance; i += 1) {
+        // 線上の位置
+        const t = i / distance;
+        const x = x1 + dx * t;
+        const y = y1 + dy * t;
 
-  for (let i = 0; i < distance; i += width / 2) {
-    const t = i / distance;
-    const x = x1 + dx * t;
-    const y = y1 + dy * t;
+        // 点を複数配置
+        for (let j = 0; j < density; j++) {
+            const offsetX = (Math.random() - 0.5) * width * scatter;
+            const offsetY = (Math.random() - 0.5) * width * scatter;
 
-    for (let j = 0; j < density; j++) {
-      const offsetX = (Math.random() - 0.5) * width * scatter;
-      const offsetY = (Math.random() - 0.5) * width * scatter;
-
-      ctx.drawImage(texture, x + offsetX - width, y + offsetY - width, width * 2, width * 2);
+            if (shape === 'circle') {
+                ctx.beginPath();
+                ctx.arc(x + offsetX, y + offsetY, width / 2, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (shape === 'square') {
+                ctx.fillRect(x + offsetX - width / 2, y + offsetY - width / 2, width, width);
+            } else if (shape === 'triangle') {
+                const px = x + offsetX;
+                const py = y + offsetY;
+                const height = width * Math.sqrt(3) / 2; // 正三角形の高さ
+                ctx.beginPath();
+                ctx.moveTo(px, py - height / 2);          // 上の頂点
+                ctx.lineTo(px - width / 2, py + height / 2); // 左下
+                ctx.lineTo(px + width / 2, py + height / 2); // 右下
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
     }
-  }
 }
-
-const brushTextures = {};
-
-function createBrushTexture(shape, size, color = '#000') {
-  const key = `${shape}_${size}_${color}`;
-  if (brushTextures[key]) return brushTextures[key];
-
-  const off = document.createElement('canvas');
-  off.width = off.height = size * 2;
-  const ctx = off.getContext('2d');
-  ctx.fillStyle = color;
-
-  const cx = size;
-  const cy = size;
-  const w = size;
-
-  if (shape === 'circle') {
-    ctx.beginPath();
-    ctx.arc(cx, cy, w / 2, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (shape === 'square') {
-    ctx.fillRect(cx - w / 2, cy - w / 2, w, w);
-  } else if (shape === 'triangle') {
-    const h = w * Math.sqrt(3) / 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - h / 2);
-    ctx.lineTo(cx - w / 2, cy + h / 2);
-    ctx.lineTo(cx + w / 2, cy + h / 2);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  brushTextures[key] = off;
-  return off;
-}
-
-
-
-
 
 
 
@@ -550,6 +527,8 @@ loadImageInput.addEventListener('change', (e) => {
 
 document.addEventListener('contextmenu', e => e.preventDefault());
 displayCanvas.addEventListener('contextmenu', e => e.preventDefault());
+displayCanvas.addEventListener('pointerdown', e => e.preventDefault());
+displayCanvas.addEventListener('pointermove', e => e.preventDefault());
 
 // 最初のレイヤー追加
 addLayer();
