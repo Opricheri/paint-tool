@@ -1,0 +1,327 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #eee;
+}
+
+.main-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.sidebar {
+  position: fixed;
+  z-index: 1001;
+  width: 500px;
+  height: 150px;
+  top: 0;
+  left: 0;
+  margin: 5px;
+}
+
+.canvas-container {
+  position: relative;
+  overflow: hidden;
+  width: 600px;
+  aspect-ratio: 1 / 1;
+  top: 0;
+  right: 0;
+  border: 2px solid #000;
+  background-color: #717171;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: none;
+}
+
+.canvas-container.move-cursor {
+  cursor: url('img/arrows.svg') 16 16, move;
+}
+
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: none;
+}
+
+#layerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 200px;
+  overflow-y: auto;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+#layerContainer button {
+  background: var(--color-third);
+  padding: 5px 10px;
+  cursor: pointer;
+  color: white;
+  width: auto;
+  font-size: 0.6rem;
+  text-align: center;
+  min-width: 5.5rem;
+}
+
+#layerContainer button:hover {
+  background: #ccc;
+}
+
+#layerContainer button.active {
+  background: #c2c2c2ff;
+  color: #fff;
+  border: none;
+}
+
+#layerEffectSelector select {
+  font-size: 1rem;
+}
+
+#addLayer {
+  font-weight: bolder;
+}
+
+#deleteLayer {
+  font-size: 0.6rem;
+}
+
+.layer-tool {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+
+.brushes button.active {
+  background: #5e7a93;
+}
+
+
+#penSizeSelector button {
+  font-size: 0.5rem;
+  font-weight: bolder;
+}
+
+/* スライダー全体 */
+#penSize {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #ddd;
+  outline: none;
+}
+
+#penSize::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #6c8595;
+  cursor: pointer;
+
+  margin-top: -3px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+#penSize::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #ddd;
+}
+
+#colorCode {
+  border: 2px solid #ccc;
+  border-radius: var(--radius);
+  padding: 2px;
+  font-size: 0.9rem;
+}
+
+#colorSelector {
+  border: 2px solid #ccc;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+}
+
+#colorSelector:hover {
+  border: 2px solid #b3b3b3;
+}
+
+.color-btn {
+  display: inline-flex;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+
+  border: 2px solid #ccc;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+}
+
+.color-btn:hover {
+  transform: scale(1.05);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#loadImage {
+  display: none;
+}
+
+#loadReference {
+  display: none;
+}
+
+button,
+.custom-file-btn {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: #fff;
+  padding: 0 1rem;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+button:hover,
+.custom-file-btn:hover {
+  background: #5e7a93;
+}
+
+#penSize {
+  width: 70px;
+}
+
+#currentPenSizeValue {
+  width: 3.5rem;
+  border: none;
+  outline: none;
+}
+
+
+.bottomToolBar {
+  display: flex;
+  z-index: 1001;
+  position: absolute;
+  flex-direction: row;
+  align-items: center;
+  bottom: 0;
+  left: 0;
+  gap: 10px;
+}
+
+#layerContainerModal {
+  position: fixed;
+  top: 50px;
+  left: -45px;
+  width: 300px;
+  height: 100%;
+  z-index: 2000;
+  overflow-y: auto;
+}
+
+.layer-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.visible-btn {
+  background: var(--color-primary) !important;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0 !important;
+}
+
+.visible-btn:hover {
+  background: var(--color-third) !important;
+}
+
+.visible-btn:active {
+  background: #c2c2c2ff !important;
+}
+
+
+#subViewContent {
+  position: fixed;
+  top: 210px;
+  right: 10px;
+}
+
+#subViewContainer {
+  position: fixed;
+  overflow: hidden;
+  top: 10px;
+  right: 10px;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+}
+
+#subViewCanvas {
+  width: 200px;
+  height: 200px;
+}
+
+#createNewProject {
+  background: #fff;
+  user-select: none;
+  pointer-events: auto;
+}
+
+
+@media (max-width: 900px) {
+  .main-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .canvas-container {
+    width: 400px;
+    height: 90vw;
+  }
+}

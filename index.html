@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>レイヤー対応お絵かきアプリ</title>
+    <link rel="stylesheet" href="kwzm.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="card sidebar">
+        <div class="draggableArea"></div>
+        <div class="toolbar">
+            <button id="" data-modal-target="#fileModal"><i class="fa-solid fa-floppy-disk"></i></button>
+            <div class="modal" id="fileModal">
+                <div class="modal-content">
+                    <button id="saveKWZM"><i class="fa-solid fa-floppy-disk"></i>Save as KWZM</button>
+                    <button id="saveJPG"><i class="fa-solid fa-floppy-disk"></i>Save as JPG</button>
+                    <button class="modal-close" data-close="true">&times;</button>
+                </div>
+            </div>
+
+            <label class="custom-file-btn" for="loadImage" accept=".kwzm"><i
+                    class="fa-solid fa-folder-open"></i></label>
+            <input type="file" id="loadImage" accept="image/*">
+
+            <label for="penColor" class="color-btn" id="colorPreview"></label>
+            <span id="colorCode">#000000</span>
+            <input type="color" id="penColor" value="#000000">
+
+            <div class="tool-group">
+                <label for="colorSelector"></label>
+                <select id="colorSelector">
+                    <option value="#ff0000" style="color:#ff0000;">🔴</option>
+                    <option value="#00ff00" style="color:#00ff00;">🟢</option>
+                    <option value="#0000ff" style="color:#0000ff;">🔵</option>
+                    <option value="#ffff00" style="color:#ffff00;">🟡</option>
+                    <option value="#ff00ff" style="color:#ff00ff;">🟣</option>
+                    <option value="#00ffff" style="color:#00ffff;">🔵</option>
+                    <option value="#000000" style="color:#000000;">⚫</option>
+                    <option value="#ffffff" style="color:#000000;">⚪</option>
+                </select>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="toolbar brushes">
+            <div class="tool-group">
+                <button id="penBtn"><i class="fa-solid fa-pen"></i></button>
+                <button id="eraserBtn"><i class="fa-solid fa-eraser"></i></button>
+                <button id="brushBtn"><i class="fas fa-brush"></i></button>
+                <button id="sprayBtn"><i class="fas fa-spray-can"></i></button>
+                <button id="moveBtn"><i class="fas fa-arrows-up-down-left-right"></i></button>
+            </div>
+
+            <div class="tool-group">
+                <label for="penSize"></label>
+                <input id="penSize" name="penSize" type="range" value="1" step="0.01" max="3" min="-1">
+                <input id="currentPenSizeValue" type="number">
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="tool-group">
+            <div id="penSizeSelector">
+                <button data-size="0.1">0.1</button>
+                <button data-size="1">1</button>
+                <button data-size="5">5</button>
+                <button data-size="10">10</button>
+                <button data-size="50">50</button>
+                <button data-size="100">100</button>
+                <button data-size="200">200</button>
+                <button data-size="500">500</button>
+                <button data-size="800">800</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card bottomToolBar">
+        <button id="layerContainerBtn" data-modal-target="#layerContainerModal"><i
+                class="fa-regular fa-window-maximize"></i></button>
+        <div class="tool-group">
+            <button id="zoomIn">+</button>
+            <button id="zoomOut">-</button>
+            <button onclick="defaultZoom()"><i class="fas fa-sync"></i></button>
+            <span id="zoomLabel">100%</span>
+        </div>
+        <p id="currentPen">Pen</p>
+        <button onclick="undo()"><i class="fa-solid fa-rotate-left"></i></button>
+        <button onclick="redo()"><i class="fa-solid fa-rotate-right"></i></button>
+        <button data-modal-target="#subViewModal"><i class="fa-solid fa-square"></i></button>
+        <button id="toggleTheme"><i id="themeIcon" class="fas fa-sun"></i></button>
+    </div>
+
+    <div class="modal active" id="subViewModal">
+        <div class="modal-content subView-container" id="subViewContent">
+            <label class="custom-file-btn" for="loadReference"><i class="fa-solid fa-folder-open"></i></label>
+            <input type="file" id="loadReference" accept="image/*">
+            <button id="subViewZoomIn">+</button>
+            <button id="subViewZoomOut">-</button>
+            <button class="modal-close" data-close="true">&times;</button>
+            <div id="subViewContainer">
+                <canvas id="subViewCanvas" width="200" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal active" id="layerContainerModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close="true">&times;</button>
+            <label for="layerEffects"></label>
+            <select id="layerEffects">
+                <option value="source-over" selected>Normal</option>
+                <option value="multiply">Multiply</option>
+                <option value="screen">Screen</option>
+                <option value="overlay">Overlay</option>
+                <option value="soft-light">Soft-light</option>
+                <option value="hard-light">Hard-light</option>
+                <option value="lighten">Lighten</option>
+                <option value="darken">Darken</option>
+            </select>
+            <hr style="margin: 3px;">
+            <div class="layer-tool">
+                <button id="addLayer" onclick="addLayer()">+</button>
+                <button id="layerUp">↑</button>
+                <button id="layerDown">↓</button>
+                <button onclick="copyLayer()"><i class="fa-solid fa-copy"></i></button>
+                <button id="deleteLayer" onclick="deleteLayerFromContainer()"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            <div class="tool-group" id="layerContainer"></div>
+        </div>
+    </div>
+
+    <div class="container main-container">
+        <div class="canvas-container">
+            <canvas id="bg"></canvas>
+        </div>
+    </div>
+
+    <div class="modal active" id="createNewProject">
+        <div class="modal-content">
+            <h4>Create New Project...</h4>
+            <hr>
+            width: <input type="number" value="400" id="canvasWidth">
+            height: <input type="number" value="400" id="canvasHeight">
+            <hr>
+            <button id="createNewProjectBtn">CREATE</button>
+        </div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+    <script type="text/javascript" src="kwzm.js"></script>
+</body>
+
+</html>
