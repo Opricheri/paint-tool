@@ -1,4 +1,5 @@
 import { saveTheme, loadTheme, toggleTheme, keyBindings } from "./config.js";
+import { hexToRgba, rgbaToHex } from "./mutual.js";
 
 saveTheme();
 loadTheme();
@@ -7,21 +8,21 @@ const themeBtn = document.getElementById("toggleTheme");
 const themeIcon = document.getElementById("themeIcon");
 
 function updateIcon(theme) {
-  if (theme === "light") {
-    themeIcon.classList.remove("fa-moon");
-    themeIcon.classList.add("fa-sun");
-  } else {
-    themeIcon.classList.remove("fa-sun");
-    themeIcon.classList.add("fa-moon");
-  }
+    if (theme === "light") {
+        themeIcon.classList.remove("fa-moon");
+        themeIcon.classList.add("fa-sun");
+    } else {
+        themeIcon.classList.remove("fa-sun");
+        themeIcon.classList.add("fa-moon");
+    }
 }
 
 updateIcon(document.documentElement.getAttribute("data-theme"));
 
 themeBtn.addEventListener("click", () => {
-  toggleTheme();
-  const currentTheme = document.documentElement.getAttribute("data-theme");
-  updateIcon(currentTheme);
+    toggleTheme();
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    updateIcon(currentTheme);
 });
 
 
@@ -165,8 +166,9 @@ const eraserBtn = document.getElementById('eraserBtn');
 const brushBtn = document.getElementById('brushBtn');
 const sprayBtn = document.getElementById('sprayBtn');
 const moveBtn = document.getElementById('moveBtn');
+const dropperBtn = document.getElementById('dropperBtn');
 
-const brushes = [penBtn, eraserBtn, brushBtn, sprayBtn, moveBtn];
+const brushes = [penBtn, eraserBtn, brushBtn, sprayBtn, moveBtn, dropperBtn];
 
 function setActiveBrush(selectedBrush) {
     brushes.forEach(brush => brush.classList.remove('active'));
@@ -187,7 +189,7 @@ penBtn.addEventListener('click', () => setActiveTool('pen'));
 eraserBtn.addEventListener('click', () => setActiveTool('eraser'));
 brushBtn.addEventListener('click', () => setActiveTool('brush'));
 sprayBtn.addEventListener('click', () => setActiveTool('spray'));
-
+dropperBtn.addEventListener('click', () => setActiveTool('dropperBtn'));
 
 penBtn.addEventListener('click', () => {
     currentPen.textContent = 'Pen';
@@ -219,7 +221,11 @@ moveBtn.addEventListener('click', () => {
     setActiveBrush(moveBtn);
 })
 
-
+dropperBtn.addEventListener('click', () => {
+    currentPen.textContent = 'Dropper';
+    tool = 'dropper';
+    setActiveBrush(dropperBtn);
+})
 
 setActiveBrush(penBtn);
 
@@ -244,7 +250,7 @@ export function addLayer() {
     const layerName = `レイヤー${layerIdCounter++}`;
 
     // レイヤープロパティ
-    layers.push({ canvas, ctx, effect: 'source-over', name: layerName, isVisible: true });
+    layers.push({ canvas, ctx, effect: 'source-over', name: layerName, isVisible: true, opacity: 1 });
 
     container.appendChild(canvas);
     addLayerInContainer();
@@ -268,6 +274,10 @@ function setActiveLayer(index) {
             const btnIndex = parseInt(btn.dataset.index);
             btn.classList.toggle('active', btnIndex === index);
         });
+
+        const clo = layers[currentLayerIndex].opacity;
+        opacity.value = clo * 100;
+        currentLayerOpacity.value = clo * 100;
 
         layerEffectsSelect.value = layers[currentLayerIndex].effect;
     }
@@ -410,7 +420,8 @@ export function copyLayer() {
         ctx: newCtx,
         effect: srcLayer.effect,
         name: srcLayer.name + ' コピー',
-        isVisible: srcLayer.isVisible
+        isVisible: srcLayer.isVisible,
+        opacity: srcLayer.opacity,
     };
 
     if (newLayer.name.includes(" コピー")) {
@@ -443,6 +454,7 @@ function saveHistory() {
             effect: layer.effect,
             name: layer.name,
             isVisible: layer.isVisible,
+            opacity: layer.opacity,
             width: layer.canvas.width,
             height: layer.canvas.height
         };
@@ -485,7 +497,8 @@ export function undo() {
             ctx: newCtx,
             effect: savedLayer.effect,
             name: savedLayer.name,
-            isVisible: savedLayer.isVisible
+            isVisible: savedLayer.isVisible,
+            opacity: savedLayer.opacity,
         });
     });
 
@@ -524,7 +537,8 @@ export function redo() {
             ctx: newCtx,
             effect: savedLayer.effect,
             name: savedLayer.name,
-            isVisible: savedLayer.isVisible
+            isVisible: savedLayer.isVisible,
+            opacity: savedLayer.opacity,
         });
     });
 
@@ -611,6 +625,16 @@ function draw(e) {
             ctx.strokeStyle = penColorInput.value;
             drawTexturedBrush(ctx, seg.x1, seg.y1, seg.x2, seg.y2, seg.width, { density: 20, shape: 'triangle', scatter: 30 });
             break;
+        case 'dropper':
+            const pixel = displayCtx.getImageData(seg.x1, seg.y1, 1, 1).data;
+            const [r, g, b, a] = pixel;
+            //const rgba = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+            const hex = rgbaToHex(r, g, b, a);
+            penColorInput.value = hex;
+            ctx.fillStyle = penColorInput.value;
+            ctx.strokeStyle = penColorInput.value;
+            colorPreview.style.backgroundColor = penColorInput.value;
+            break;
     }
 
     lastX = x;
@@ -628,7 +652,7 @@ function endDraw() {
     lastY = undefined;
     renderAllLayers();
     saveHistory();
-    console.log(history, historyIndex);
+    //console.log(history, historyIndex);
 }
 
 
@@ -706,10 +730,12 @@ function renderAllLayers() {
     layers.forEach(layer => {
         if (layer.isVisible === true) {
             displayCtx.globalCompositeOperation = layer.effect || 'source-over';
+            displayCtx.globalAlpha = layer.opacity !== undefined ? layer.opacity : 1;
             displayCtx.drawImage(layer.canvas, 0, 0);
         }
     });
 
+    displayCtx.globalAlpha = 1;
     displayCtx.globalCompositeOperation = 'source-over';
 }
 
@@ -729,6 +755,59 @@ function toggleVisible(i) {
             : "fa-solid fa-eye-slash";
     });
 }
+
+
+const opacity = document.getElementById('opacity');
+const currentLayerOpacity = document.getElementById('currentLayerOpacity');
+
+let opacityValue = 1;
+
+function toggleOpacity(opacityVal, save = false) {
+    const layer = layers[currentLayerIndex];
+    layer.opacity = opacityVal;
+    renderAllLayers();
+    if (save) saveHistory();
+}
+
+opacity.value = opacityValue * 100;
+currentLayerOpacity.value = opacityValue * 100;
+
+opacity.addEventListener('input', (e) => {
+    const val100 = e.target.value;
+    const val = val100 / 100;
+    currentLayerOpacity.value = val100;
+    opacityValue = val;
+    toggleOpacity(val, false);
+});
+
+opacity.addEventListener('change', (e) => {
+    const val = e.target.value / 100;
+    toggleOpacity(val, true);
+})
+
+currentLayerOpacity.addEventListener('input', (e) => {
+    let val100 = parseFloat(e.target.value);
+
+    if (isNaN(val100)) val100 = 0;
+    val100 = Math.min(Math.max(val100, 0), 100);
+
+    const val = val100 / 100;
+    opacity.value = val100;
+    opacityValue = val;
+    toggleOpacity(val, false);
+});
+
+currentLayerOpacity.addEventListener('change', (e) => {
+    let val100 = parseFloat(e.target.value);
+    if (isNaN(val100)) val100 = 0;
+    val100 = Math.min(Math.max(val100, 0), 100);
+
+    const val = val100 / 100;
+    toggleOpacity(val, true);
+    opacity.value = val100;
+    currentLayerOpacity.value = val100;
+});
+
 
 
 //#region ズーム・移動 
@@ -849,7 +928,7 @@ const loadImageInput = document.getElementById('loadImage');
 loadImageInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     await loadKWZM(file);
 });
 
@@ -869,6 +948,7 @@ document.getElementById("saveKWZM").addEventListener('click', () => {
             name: layer.name,
             effect: layer.effect,
             isVisible: layer.isVisible,
+            opacity: layer.opacity,
             imageData: layer.canvas.toDataURL('image/png')
         }))
     }
@@ -896,25 +976,26 @@ async function loadKWZM(file) {
 
     const { width, height } = data.canvas;
 
-    
+
     bgCanvas.width = width;
     bgCanvas.height = height;
-    
+
     displayCanvas.width = width;
     displayCanvas.height = height;
-    
+
     layers.forEach(layer => {
         if (layer.canvas !== bgCanvas && layer.canvas !== displayCanvas) {
             container.removeChild(layer.canvas);
         }
     });
     layers = [];
-    
+
 
     for (const layerData of data.layers) {
         const layer = createLayer(layerData.name, width, height);
         layer.effect = layerData.effect;
         layer.isVisible = layerData.isVisible ?? true;
+        layer.opacity = layerData.opacity ?? 1;
 
         await new Promise(resolve => {
             const img = new Image();
@@ -939,6 +1020,9 @@ async function loadKWZM(file) {
     if (typeof saveHistory === 'function') {
         saveHistory();
     }
+
+    zoom = 0.7;
+    updateZoom();
 }
 
 function createLayer(name = null, width = null, height = null) {
@@ -954,7 +1038,7 @@ function createLayer(name = null, width = null, height = null) {
     const ctx = canvas.getContext("2d");
     const layerName = name || `レイヤー${layerIdCounter++}`;
 
-    return { canvas, ctx, effect: 'source-over', name: layerName, isVisible: true };
+    return { canvas, ctx, effect: 'source-over', name: layerName, isVisible: true, opacity: 1 };
 }
 
 
@@ -1150,7 +1234,7 @@ draggable(dragHandle, sidebar);
 
 
 document.addEventListener('keydown', (e) => {
-    switch(e.key) {
+    switch (e.key) {
         case keyBindings.zoomIn:
             zoom *= 1.1;
             updateZoom();
@@ -1175,6 +1259,7 @@ document.addEventListener('keydown', (e) => {
             break;
     }
 });
+
 
 
 

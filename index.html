@@ -50,11 +50,12 @@
 
         <div class="toolbar brushes">
             <div class="tool-group">
-                <button id="penBtn"><i class="fa-solid fa-pen"></i></button>
-                <button id="eraserBtn"><i class="fa-solid fa-eraser"></i></button>
-                <button id="brushBtn"><i class="fas fa-brush"></i></button>
-                <button id="sprayBtn"><i class="fas fa-spray-can"></i></button>
-                <button id="moveBtn"><i class="fas fa-arrows-up-down-left-right"></i></button>
+                <button class="tooltip" data-tooltip="Pen" id="penBtn"><i class="fa-solid fa-pen"></i></button>
+                <button class="tooltip" data-tooltip="Eraser" id="eraserBtn"><i class="fa-solid fa-eraser"></i></button>
+                <button class="tooltip" data-tooltip="Brush" id="brushBtn"><i class="fas fa-brush"></i></button>
+                <button class="tooltip" data-tooltip="Spray" id="sprayBtn"><i class="fas fa-spray-can"></i></button>
+                <button class="tooltip" data-tooltip="Dropper" id="dropperBtn"><i class="fas fa-eye-dropper"></i></i></button>
+                <button class="tooltip" data-tooltip="Move" id="moveBtn"><i class="fas fa-arrows-up-down-left-right"></i></button>
             </div>
 
             <div class="tool-group">
@@ -127,11 +128,14 @@
             </select>
             <hr style="margin: 3px;">
             <div class="layer-tool">
-                <button id="addLayer" onclick="addLayer()">+</button>
-                <button id="layerUp">↑</button>
-                <button id="layerDown">↓</button>
-                <button onclick="copyLayer()"><i class="fa-solid fa-copy"></i></button>
-                <button id="deleteLayer" onclick="deleteLayerFromContainer()"><i class="fa-solid fa-trash"></i></button>
+                <button class="tooltip" data-tooltip="Add layer" id="addLayer" onclick="addLayer()">+</button>
+                <button class="tooltip" id="layerUp">↑</button>
+                <button class="tooltip" id="layerDown">↓</button>
+                <button class="tooltip" data-tooltip="Copy layer" onclick="copyLayer()"><i class="fa-solid fa-copy"></i></button>
+                <button class="tooltip" id="deleteLayer" data-tooltip="Delete layer" onclick="deleteLayerFromContainer()"><i class="fa-solid fa-trash"></i></button>
+                <input id="currentLayerOpacity" type="number">
+                <label for="opacity"></label>
+                <input id="opacity" name="opacity" type="range" value="100" step="1" max="100" min="0">
             </div>
             <div class="tool-group" id="layerContainer"></div>
         </div>

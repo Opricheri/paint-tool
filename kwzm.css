@@ -197,6 +197,55 @@ input::selection {
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+/* ツールチップの基本スタイル */
+.tooltip {
+  position: relative;
+  cursor: pointer;
+}
+
+/* ツールチップの内容 */
+.tooltip::after {
+  content: attr(data-tooltip);  /* data-tooltip属性の内容を表示 */
+  position: absolute;
+  bottom: 120%;                /* 上に表示 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 12px;
+  opacity: 0;                  /* 初期は非表示 */
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  z-index: 1000;
+}
+
+/* ツールチップの矢印 */
+.tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: 90%;                 /* ツールチップの下端 */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0,0,0,0.8) transparent transparent transparent;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+
+/* ホバー時に表示 */
+.tooltip:hover::after,
+.tooltip:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-5px);
+  transition-delay: 0.5s;
+}
+
+
 
 @media (max-width: 900px) {
   .container {
